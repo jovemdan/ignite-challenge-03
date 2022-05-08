@@ -26,7 +26,7 @@ export function CartProvider({ children }: CartProviderProps): JSX.Element {
     const storagedCart = localStorage.getItem('@RocketShoes:cart')
 
     if (storagedCart) {
-      return setCart(JSON.parse(storagedCart))
+      return JSON.parse(storagedCart)
     }
 
     return []
@@ -34,26 +34,34 @@ export function CartProvider({ children }: CartProviderProps): JSX.Element {
 
   const addProduct = async (productId: number) => {
     try {
-      const updatedCart = [...cart]
-      const productExist = updatedCart.find(s => s.id === productId)
+      const updatedCart = cart.map(product => ({ ...product }))
+      const productExist = updatedCart.find(product => product.id === productId)
+
       const stock = await api.get(`/stock/${productId}`)
       const stockAmount = stock.data.amount
+
       const currentAmount = productExist ? productExist.amount : 0
 
       const amount = currentAmount + 1
 
       if (amount > stockAmount) {
         toast.error('Quantidade solicitada fora de estoque')
+        return
       }
 
       if (productExist) {
         productExist.amount = amount
       } else {
         const product = await api.get(`/products/${productId}`)
-        setCart({
+
+        const newProduct = {
           ...product.data,
           amount: 1
-        })
+        }
+        updatedCart.push(newProduct)
+
+        setCart(updatedCart)
+        localStorage.setItem('@RocketShoes:cart', JSON.stringify(updatedCart))
 
       }
     } catch {
@@ -74,7 +82,19 @@ export function CartProvider({ children }: CartProviderProps): JSX.Element {
     amount,
   }: UpdateProductAmount) => {
     try {
-      // TODO
+      const updatedCart = cart.map(product => ({ ...product }))
+      const productExist = updatedCart.find(product => product.id === productId)
+
+      const stock = await api.get(`/stock/${productId}`)
+      const stockAmount = stock.data.amount
+      const currentAmount = productExist ? productExist.amount : 0
+      const amount = currentAmount + 1
+
+      if (amount > stockAmount) {
+        toast.error('Quantidade solicitada fora de estoque')
+        return
+      }
+
     } catch {
       toast.error('Erro na alteração de quantidade do produto')
     }

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import { useState, useEffect } from 'react'
 import { MdAddShoppingCart } from 'react-icons/md'
 
 import { ProductList } from './styles'
@@ -26,54 +26,49 @@ const Home = (): JSX.Element => {
   const { addProduct, cart } = useCart()
 
   const cartItemsAmount = cart.reduce((sumAmount, product) => {
-    const newSumAmount = { ...sumAmount }
-    newSumAmount[product.id] = product.amount
-
-    return newSumAmount
-
+    sumAmount[product.id] = product.amount
+    // console.log(sumAmount)
+    return sumAmount
   }, {} as CartItemsAmount)
 
   useEffect(() => {
     async function loadProducts() {
-      const response = await api.get<Product[]>('products')
+      const response = await api.get('products')
 
-      const data = response.data.map(product => ({
-        ...product,
-        priceFormatted: formatPrice(product.price)
-
-      }))
-
-      setProducts(data)
-
+      setProducts(response.data)
     }
+
     loadProducts()
   }, [])
 
   function handleAddProduct(id: number) {
     addProduct(id)
+    console.log(cart)
   }
 
   return (
     <ProductList>
-      {products.map(product => (
-        <li key={product.id}>
-          <img src={product.image} alt={product.title} />
-          <strong>{product.title}</strong>
-          <span>{product.priceFormatted}</span>
-          <button
-            type="button"
-            data-testid="add-product-button"
-            onClick={() => handleAddProduct(product.id)}
-          >
-            <div data-testid="cart-product-quantity">
-              <MdAddShoppingCart size={16} color="#FFF" />
-              {cartItemsAmount[product.id] || 0}
-            </div>
+      {
+        products.map(product => (
+          <li key={product.id}>
+            <img src={product.image} alt={product.title} />
+            <strong>{product.title}</strong>
+            <span>{formatPrice(product.price)}</span>
+            <button
+              type="button"
+              data-testid="add-product-button"
+              onClick={() => handleAddProduct(product.id)}
+            >
+              <div data-testid="cart-product-quantity">
+                <MdAddShoppingCart size={16} color="#FFF" />
+                {cartItemsAmount[product.id] || 0}
+              </div>
 
-            <span>ADICIONAR AO CARRINHO</span>
-          </button>
-        </li>
-      ))}
+              <span>ADICIONAR AO CARRINHO</span>
+            </button>
+          </li>
+        ))
+      }
     </ProductList>
   )
 }
