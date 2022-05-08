@@ -25,7 +25,6 @@ const Cart = (): JSX.Element => {
       cart.reduce((sumTotal, product) => {
         const subtotal = product.price * product.amount
         sumTotal += Number(subtotal)
-        console.log("sumTotal", subtotal)
         return sumTotal
       }, 0)
     )
@@ -36,8 +35,6 @@ const Cart = (): JSX.Element => {
 
   }))
 
-  console.log("cartFormatted", cartFormatted)
-  // console.log(cart)
   function handleProductIncrement(product: Product) {
     updateProductAmount({ productId: product.id, amount: product.amount + 1 })
   }
